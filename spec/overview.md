@@ -6,8 +6,8 @@ A team game of free-association.
 - Each team has at least two members, one of which must be the team leader.
 - For each game, a set of 16 "game" words is drawn from a master word list.
 - The game words list is presented to all players, and everyone is given a minute to examine the list.
-- The game words are assigned,or keyed, as follows:
-    13 to teams (7 going to the team that goes first and 6 to the other one)
+- The game words are assigned,or keyed, as follows:  
+    13 to teams (7 going to the team that goes first and 6 to the other one)  
     3 are neutral
 - The team that goes first is randomly assigned.
 - The key is presented to both team leaders, and the first turn begins.
