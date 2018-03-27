@@ -46,8 +46,8 @@ A web client will require some HTML, CSS, and Javascript (HTML5 canvas).
 Qt  
 **Python**  
 **Javascript**  
-socket.io  
-reacjt.js: a Javascript library for building user interfaces.   
+Socket.io  
+React: a Javascript library for building user interfaces.   
 QML: user interface markup language.
 
 ## Messaging
