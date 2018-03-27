@@ -19,13 +19,13 @@ WebSocket is bi-rirectional, full-duplex, and requires a single TCP connection f
 **JavaScript**  
 Node.js: asynchronous event-driven JavaScript runtime.  
 Socket.io: JavaScript library for realtime web applications.  
-Express: web application framework for Node.js.
+Express: web application framework for Node.js.  
 **Python**  
 Flask: micro web framework for Python.  
 Tornado: Python web framework and asynchronous networking library. 
 Pyramid: lightweight Python web framework aimed at taking small web apps into big web apps. 
 Django: web framework written in Python.  
-Twisted Python: event-driven networking engine written in Python.
+Twisted Python: event-driven networking engine written in Python.  
 **C++**  
 Qt: cross-platform application framework.
 
@@ -47,6 +47,7 @@ Qt
 **Python**  
 **Javascript**  
 socket.io  
+reacjt.js: a Javascript library for building user interfaces.   
 QML: user interface markup language.
 
 ## Messaging
