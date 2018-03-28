@@ -13,7 +13,7 @@ The server software will be responsible for:
 ## Server Options
 
 1. HTTP vs WebSocket  
-WebSocket is bi-rirectional, full-duplex, and requires a single TCP connection for the lifecycle of the WebSocket connection. 
+WebSocket is bi-directional, full-duplex, and requires a single TCP connection for the lifecycle of the WebSocket connection. 
 
 2. Server software  
 **JavaScript**  
