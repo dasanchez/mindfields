@@ -9,10 +9,12 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UML or simple schematics  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*See _flowcharts_ folder
 
-[ ] Explore client / server options  
-Focus on local native development, with remote web-based solution in mind for the future
+[X] Explore client / server options  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Go over languages and frameworks  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*See _client\_server\_evaluation.md_ 
 
 ### Stage 2: Implementation planning
+[ ] Generate server testbed
 [ ] Explore UI options through interactive mockups  
 &nbsp;&nbsp;&nbsp;&nbsp;- Processing  
 &nbsp;&nbsp;&nbsp;&nbsp;- QML  
