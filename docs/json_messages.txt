@@ -1,0 +1,93 @@
+Mindfields
+
+Server: Incoming Messages from Clients
+
+Player Name Request
+type: "newplayerrequest"
+name: [ string ]
+
+Team Selection
+type: "teamrequest"
+name: [ string ]
+team: "blue" or "orange"
+
+Role Selection
+type: "rolerequest"
+name: [ string ]
+role: "leader" or "member"
+
+Ready signal
+type: "startgame"
+name: [ string ]
+
+Hint Submission
+type: hint
+hint: [ string ]
+count: [ int ]
+
+Hint Response
+type: hintresponse
+response: "approve" or "reject"
+
+Guess submitted
+type: guess
+guess: [ string ]
+
+Message
+type: message
+msg: [ string ]
+
+Server: outgoing messages
+
+Name Accepted
+type: nameresponse
+name: [ name ]
+response: "accepted" or "taken"
+
+Team Response
+type: teamresponse
+response: "accepted" or "teamfull"
+team: "blue" or "orange"
+leader: [ bool ] (true or false)
+
+Role Accepted
+type: roleaccepted
+role: "leader" or "member"
+
+Team Leaders Assigned
+type: leadersready
+
+Word List
+type: "wordlist"
+words: [ string array ]
+
+Key Word List
+type: "keywordlist"
+bluewords: [ string array ]
+orangewords: [ string array ]
+
+Notify Players of change of state
+type: "statechange"
+newstate: "awaitinghint", "hintapproval", "guessrevealed"
+			"lobby", "wordsdisplayed", "gameover"
+team: "blue" or "orange"
+reason: "firstturn", "timeout", "newhint"
+hint: [ string ] (optional)
+
+Hint response
+type: "hintresponse"
+response: "approved" or "rejected"
+
+Guess evaluation
+type: guessreveal
+guess: [ string ]
+category: "blue" , "orange", or "neutral"
+
+Winner reveal
+type: "winner"
+winner: "blue" or "orange"
+
+Message
+type: "message"
+name: [ string ]
+msg: [ string ] 
