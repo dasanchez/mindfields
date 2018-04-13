@@ -69,10 +69,11 @@ orangewords: [ string array ]
 Notify Players of change of state
 type: "statechange"
 newstate: "awaitinghint", "hintapproval", "guessrevealed"
-			"lobby", "wordsdisplayed", "gameover"
+			"lobby", "wordsdisplayed", "gameover", "awaitingguess"
 team: "blue" or "orange"
 reason: "firstturn", "timeout", "newhint"
 hint: [ string ] (optional)
+count: [ int ] ( optional )
 
 Hint response
 type: "hintresponse"
@@ -81,7 +82,8 @@ response: "approved" or "rejected"
 Guess evaluation
 type: guessreveal
 guess: [ string ]
-category: "blue" , "orange", or "neutral"
+player: [ string ]
+team: "blue" , "orange", or "neutral"
 
 Winner reveal
 type: "winner"
