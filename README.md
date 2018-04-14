@@ -1,2 +1,3 @@
-# mindfields
-Project files for Mindfields game
+# Mindfields
+
+A digital tribute to [Codenames](https://czechgames.com/en/codenames/).
