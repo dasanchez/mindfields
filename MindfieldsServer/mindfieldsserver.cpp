@@ -68,28 +68,33 @@ QJsonDocument MindfieldsServer::generatePlayerList()
     QJsonObject jsonPlayers;
     QJsonArray bluePlayers;
     QJsonArray orangePlayers;
+    QJsonArray neutralPlayers;
 
     jsonPlayers.insert( "type", "playerlist");
 
     for ( int i = 0; i < gamePlayers.size() ; ++i )
     {
-        qDebug()  << "Player is in " << ( gamePlayers[ i ].team == BLUE ? "Blue" : "Orange" )
-                  << " team";
         if ( gamePlayers[ i ].team == BLUE )
         {
             bluePlayers.append( gamePlayers[ i ].name );
             if ( gamePlayers[ i ].role == LEADER )
                 jsonPlayers.insert( "blueleader", gamePlayers[ i ].name );
         }
-        else
+        else if ( gamePlayers[ i ].team == ORANGE )
         {
             orangePlayers.append( gamePlayers[ i ].name );
             if ( gamePlayers[ i ].role == LEADER )
                 jsonPlayers.insert( "orangeleader", gamePlayers[ i ].name );
         }
+        else // players without a team
+        {
+            neutralPlayers.append( gamePlayers[ i ].name );
+        }
     }
-    jsonPlayers.insert("blueteam", bluePlayers);
-    jsonPlayers.insert("orangeteam", orangePlayers);
+
+    jsonPlayers.insert( "blueteam", bluePlayers );
+    jsonPlayers.insert( "orangeteam", orangePlayers );
+    jsonPlayers.insert( "neutral", neutralPlayers );
     QJsonDocument jsonDoc( jsonPlayers );
     return jsonDoc;
 }
@@ -226,6 +231,8 @@ void MindfieldsServer::makeNewPlayer(QString name, QTcpSocket *socket)
     Player newPlayer;
     newPlayer.name = name;
     newPlayer.socket = socket;
+    newPlayer.team = NEUTRAL;
+    newPlayer.role = MEMBER;
 
     gamePlayers.append( newPlayer );
 
@@ -233,13 +240,15 @@ void MindfieldsServer::makeNewPlayer(QString name, QTcpSocket *socket)
     {
         printPlayers();
     }
+
+    notifyAllPlayers( generatePlayerList() );
 }
 
 // start TCP server
 void MindfieldsServer::newSession()
 {
     tcpServer = new QTcpServer(this);
-    if ( !tcpServer->listen(QHostAddress::LocalHost, 8888 )) {
+    if ( !tcpServer->listen(QHostAddress::LocalHost, listenPort )) {
         qDebug() << QString("Unable to start the server: %1.").arg(tcpServer->errorString());
         return;
     }
@@ -280,8 +289,29 @@ void MindfieldsServer::printPlayers()
     if ( !gamePlayers.isEmpty() )
         foreach ( Player player, gamePlayers )
         {
-            qDebug() << "Player: " << player.name << "Team: " << ( player.team == BLUE ? "Blue" : "Orange")
-                     << "Role: " << ( player.role == LEADER ? "leader" : "member" );
+            QString playerInfo;
+            playerInfo.append( "Player: " );
+            playerInfo.append( player.name );
+            playerInfo.append( " | Team: " );
+            switch ( player.team )
+            {
+            case NEUTRAL:
+                playerInfo.append( "neutral" );
+                break;
+            case BLUE:
+                playerInfo.append( "blue" );
+                break;
+            case ORANGE:
+                playerInfo.append( "orange" );
+                break;
+            default:
+                break;
+            }
+
+            playerInfo.append( " | Role: ");
+            playerInfo.append( (player.role == LEADER ? "leader" : "member" ) );
+
+            qDebug() << playerInfo;
         }
 }
 
@@ -335,6 +365,16 @@ void MindfieldsServer::processClientData()
                 // hint has been approved
                 gameState = AWAITING_GUESS;
                 publishHint( proposedHint );
+
+                QJsonObject jsonBroadcast;
+                jsonBroadcast.insert("type", "timerstart");
+                jsonBroadcast.insert("time", turnTime / 1000 );
+                QJsonDocument broadcastDoc( jsonBroadcast );
+                notifyAllPlayers( broadcastDoc );
+
+                if ( debugMode )
+                    qDebug() << "Timer started: " << turnTime / 1000 << " seconds.";
+
                 gameTimer->start( turnTime );
             }
         }
@@ -361,6 +401,16 @@ void MindfieldsServer::processClientData()
                 gameState = GUESS_REVEALED;
                 timeLeft = gameTimer->remainingTime();
                 gameTimer->stop();
+
+                QJsonObject jsonBroadcast;
+                jsonBroadcast.insert("type", "timerstart");
+                jsonBroadcast.insert("time", msgTime / 1000 );
+                QJsonDocument broadcastDoc( jsonBroadcast );
+                notifyAllPlayers( broadcastDoc );
+
+                if ( debugMode )
+                    qDebug() << "Timer started: " << msgTime / 1000 << " seconds.";
+
                 gameTimer->start( msgTime );
             }
         }
@@ -534,7 +584,7 @@ void MindfieldsServer::processRoleRequest( QString role, QTcpSocket *socket)
                             gamePlayers[ i ].role = LEADER;
                             jsonResponse.insert( "role", "leader" );
                         }
-                        else // team already has a leader
+                        else // blue team already has a leader
                         {
                             gamePlayers[ i ].role = MEMBER;
                             jsonResponse.insert("role", "member");
@@ -548,7 +598,7 @@ void MindfieldsServer::processRoleRequest( QString role, QTcpSocket *socket)
                             gamePlayers[ i ].role = LEADER;
                             jsonResponse.insert( "role", "leader");
                         }
-                        else // team already has a leader
+                        else // orange team already has a leader
                         {
                             gamePlayers[ i ].role = MEMBER;
                             jsonResponse.insert( "role", "member");
@@ -597,7 +647,7 @@ bool MindfieldsServer::processStartRequest( QTcpSocket *socket )
             {
                 if ( gamePlayers[ i ].team == BLUE )
                     blueLeaderReady = true;
-                else
+                else if ( gamePlayers[ i ].team == ORANGE )
                     orangeLeaderReady = true;
             } // player is leader
         } // player found
@@ -824,6 +874,16 @@ void MindfieldsServer::serviceTimer()
     {
     case AWAITING_HINT:
     case AWAITING_GUESS:
+    {
+        QJsonObject jsonBroadcast;
+        jsonBroadcast.insert("type", "timerstart");
+        jsonBroadcast.insert("time", newTime / 1000 );
+        QJsonDocument broadcastDoc( jsonBroadcast );
+        notifyAllPlayers( broadcastDoc );
+
+        if ( debugMode )
+            qDebug() << "Timer started: " << newTime / 1000 << " seconds.";
+    }
         gameTimer->start( newTime );
         break;
     default:
@@ -908,6 +968,16 @@ void MindfieldsServer::setupFirstTurn()
     gameState = WORDS_PRESENTED;
 
     // start timer
+
+    QJsonObject jsonBroadcast;
+    jsonBroadcast.insert("type", "timerstart");
+    jsonBroadcast.insert("time", turnTime / 1000 );
+    QJsonDocument broadcastDoc( jsonBroadcast );
+    notifyAllPlayers( broadcastDoc );
+
+    if ( debugMode )
+        qDebug() << "Timer started: " << turnTime / 1000 << " seconds.";
+
     gameTimer->start( turnTime );
 }
 

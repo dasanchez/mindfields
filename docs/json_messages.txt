@@ -75,6 +75,10 @@ reason: "firstturn", "timeout", "newhint"
 hint: [ string ] (optional)
 count: [ int ] ( optional )
 
+Notify players of timer start
+type: timerstart
+time: [ int ] (in seconds)
+
 Hint response
 type: "hintresponse"
 response: "accepted" or "rejected"

@@ -30,6 +30,8 @@ public:
     enum GameState { LOBBY, WORDS_PRESENTED, HINT_APPROVAL, GAME_OVER,
                      AWAITING_HINT, AWAITING_GUESS, GUESS_REVEALED };
 
+    int listenPort = 8888;
+
     static const int totalCards = 16;
     static const int cardsFirstTeam = 7;
     static const int cardsSecondTeam = 6;
