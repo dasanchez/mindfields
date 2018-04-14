@@ -199,6 +199,22 @@ void MindfieldsServer::hintReceived( QString hint, QTcpSocket *socket )
     }
 }
 
+bool MindfieldsServer::isPlayer( QTcpSocket * socket )
+{
+    bool isPlayer = false;
+
+    foreach ( Player player, gamePlayers )
+    {
+        if ( socket == player.socket )
+        {
+            isPlayer = true;
+            break;
+        }
+    }
+
+    return isPlayer;
+}
+
 bool MindfieldsServer::isLeader( QTcpSocket * socket )
 {
     bool leader = false;
@@ -235,13 +251,6 @@ void MindfieldsServer::makeNewPlayer(QString name, QTcpSocket *socket)
     newPlayer.role = MEMBER;
 
     gamePlayers.append( newPlayer );
-
-    if ( debugMode )
-    {
-        printPlayers();
-    }
-
-    notifyAllPlayers( generatePlayerList() );
 }
 
 // start TCP server
@@ -537,7 +546,7 @@ bool MindfieldsServer::processGuess( QString guess, QTcpSocket *socket )
 void MindfieldsServer::processNewPlayer( QString newPlayerName, QTcpSocket *sourceClient )
 {
     if ( isNameTaken(newPlayerName) )
-    {
+    {   // refuse request - name is taken
         QJsonObject jsonResponse;
         jsonResponse.insert("type", "newplayerresponse");
         jsonResponse.insert("response", "taken");
@@ -546,8 +555,22 @@ void MindfieldsServer::processNewPlayer( QString newPlayerName, QTcpSocket *sour
         sourceClient->write( responseDoc.toJson() );
     }
     else
-    {
-        makeNewPlayer( newPlayerName, sourceClient );
+    { // make new player or rename existing one
+        if ( isPlayer( sourceClient ) ) // sender is already a registered player
+        {
+            for ( int i = 0; i < gamePlayers.size(); ++i )
+            {
+                if ( gamePlayers.at( i ).socket == sourceClient )
+                {
+                    gamePlayers[ i ].name = newPlayerName; // rename
+                    break;
+                }
+            }
+        }
+        else
+        {
+            makeNewPlayer( newPlayerName, sourceClient );
+        }
         QJsonObject jsonResponse;
         jsonResponse.insert("type", "newplayerresponse");
         jsonResponse.insert("response", "accepted");
@@ -555,6 +578,13 @@ void MindfieldsServer::processNewPlayer( QString newPlayerName, QTcpSocket *sour
         QJsonDocument responseDoc( jsonResponse );
         sourceClient->write( responseDoc.toJson() );
     }
+
+    if ( debugMode )
+    {
+        printPlayers();
+    }
+
+    notifyAllPlayers( generatePlayerList() );
 }
 
 // assign player role
@@ -967,11 +997,16 @@ void MindfieldsServer::setupFirstTurn()
     // set WORDS_PRESENTED state
     gameState = WORDS_PRESENTED;
 
-    // start timer
+    QJsonObject jsonState;
+    jsonState.insert( "type", "statechange" );
+    jsonState.insert( "newstate", "wordsdisplayed" );
+    QJsonDocument stateDoc( jsonState );
+    notifyAllPlayers( stateDoc );
 
+    // start timer
     QJsonObject jsonBroadcast;
-    jsonBroadcast.insert("type", "timerstart");
-    jsonBroadcast.insert("time", turnTime / 1000 );
+    jsonBroadcast.insert( "type", "timerstart" );
+    jsonBroadcast.insert( "time", turnTime / 1000 );
     QJsonDocument broadcastDoc( jsonBroadcast );
     notifyAllPlayers( broadcastDoc );
 
