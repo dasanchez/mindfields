@@ -1,6 +1,8 @@
 Mindfields
 
-Server: Incoming Messages from Clients
+JSON Messages
+
+Client -> Server
 
 Player Name Request
 type: "newplayerrequest"
@@ -37,7 +39,7 @@ Message
 type: message
 msg: [ string ]
 
-Server: outgoing messages
+Server -> Client
 
 Name Accepted
 type: nameresponse

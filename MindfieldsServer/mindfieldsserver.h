@@ -103,6 +103,7 @@ private:
     void switchTeams(); // toggle currentTurn
     void printPlayers(); // output player list
     bool isLeader( QTcpSocket * );
+    bool isPlayer( QTcpSocket * ); // check if the sender is already in the list of players
     QString getPlayerName( QTcpSocket * );
     QJsonDocument generatePlayerList();
 
