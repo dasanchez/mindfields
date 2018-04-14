@@ -27,7 +27,7 @@ count: [ int ]
 
 Hint Response
 type: hintresponse
-response: "approve" or "reject"
+response: "accepted" or "rejected"
 
 Guess submitted
 type: guess
@@ -50,8 +50,8 @@ response: "accepted" or "teamfull"
 team: "blue" or "orange"
 leader: [ bool ] (true or false)
 
-Role Accepted
-type: roleaccepted
+Role Request Response
+type: roleresponse
 role: "leader" or "member"
 
 Team Leaders Assigned
@@ -77,7 +77,7 @@ count: [ int ] ( optional )
 
 Hint response
 type: "hintresponse"
-response: "approved" or "rejected"
+response: "accepted" or "rejected"
 
 Guess evaluation
 type: guessreveal

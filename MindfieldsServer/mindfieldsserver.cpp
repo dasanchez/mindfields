@@ -511,39 +511,67 @@ void MindfieldsServer::processNewPlayer( QString newPlayerName, QTcpSocket *sour
 void MindfieldsServer::processRoleRequest( QString role, QTcpSocket *socket)
 {
     QJsonObject jsonResponse;
-    jsonResponse.insert("type", "roleaccepted" );
+    jsonResponse.insert("type", "roleresponse" );
 
     qDebug() << "Processing role request";
 
-    // look for player issuing the request
-    for ( int i = 0; i < gamePlayers.size() ; ++i )
+    if ( !( blueLeader && orangeLeader ) ) // if both leaders are assigned, skip assignment
     {
-        if ( gamePlayers[ i ].socket == socket )
+
+        // look for player issuing the request
+        for ( int i = 0; i < gamePlayers.size() ; ++i )
         {
-            if ( role == QString( "leader") )
+            if ( gamePlayers[ i ].socket == socket )
             {
-                if ( gamePlayers[ i ].team == BLUE )
-                    blueLeader = true;
-                else if ( gamePlayers[ i ].team == ORANGE )
-                    orangeLeader = true;
-                gamePlayers[ i ].role = LEADER;
-                jsonResponse.insert("role", "leader");
+                if ( role == QString( "leader") )
+                {
+                    // is this position available for player's team?
+                    if ( gamePlayers[ i ].team == BLUE )
+                    {
+                        if ( !blueLeader )
+                        {
+                            blueLeader = true;
+                            gamePlayers[ i ].role = LEADER;
+                            jsonResponse.insert( "role", "leader" );
+                        }
+                        else // team already has a leader
+                        {
+                            gamePlayers[ i ].role = MEMBER;
+                            jsonResponse.insert("role", "member");
+                        }
+                    } // blue player request
+                    else if ( gamePlayers[ i ].team == ORANGE )
+                    {
+                        if ( !orangeLeader )
+                        {
+                            orangeLeader = true;
+                            gamePlayers[ i ].role = LEADER;
+                            jsonResponse.insert( "role", "leader");
+                        }
+                        else // team already has a leader
+                        {
+                            gamePlayers[ i ].role = MEMBER;
+                            jsonResponse.insert( "role", "member");
+                        }
+                    } // orange player request
+                }
+                else
+                {
+                    gamePlayers[ i ].role = MEMBER;
+                    jsonResponse.insert("role", "member");
+                }
 
-            }
-            else
-            {
-                gamePlayers[ i ].role = MEMBER;
-                jsonResponse.insert("role", "member");
-            }
-            QJsonDocument responseDoc( jsonResponse );
-            socket->write( responseDoc.toJson() );
-            qDebug() << "Player: " << gamePlayers[ i ].name << "Team: "
-                     << ( gamePlayers[ i ].team == BLUE ? "Blue" : "Orange")
-                     << "Role: " << ( gamePlayers[ i ].role == LEADER ? "leader" : "member" );
+                // send response to requesting player
+                QJsonDocument responseDoc( jsonResponse );
+                socket->write( responseDoc.toJson() );
 
-            // Send player list to all connected players
-            notifyAllPlayers( generatePlayerList() );
-            break;
+                if ( debugMode )
+                    printPlayers();
+
+                // Send player list to all connected players
+                notifyAllPlayers( generatePlayerList() );
+                break;
+            }
         }
     }
 
@@ -553,10 +581,7 @@ void MindfieldsServer::processRoleRequest( QString role, QTcpSocket *socket)
         QJsonObject readyObject;
         readyObject.insert("type", "leadersassigned");
         QJsonDocument readyDoc( readyObject );
-        foreach ( Player player, gamePlayers )
-        {
-            player.socket->write( readyDoc.toJson() );
-        }
+        notifyAllPlayers( readyDoc );
     }
 }
 
