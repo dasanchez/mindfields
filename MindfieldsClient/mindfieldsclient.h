@@ -22,19 +22,22 @@ public:
     ~MindfieldsClient();
 
 public slots:
-    void connectToServer();
-    void dataReceived();
-    void socketDisconnected();
-    void socketConnected();
-    void sendData();
-    void sendPlayerRequest();
-    void sendTeamRequest();
-    void sendRoleRequest();
+    void connectSocket();
     void disconnectSocket();
+    void socketConnected();
+    void socketDisconnected();
+    void sendData();
+    void dataReceived();
+    void sendPlayerRequest();
+    void sendTeamRequest( );
+    void sendRoleRequest( );
 
 private:
     Ui::MindfieldsClient *ui;
-    QTcpSocket *tcpSocket = nullptr;
+    QTcpSocket *p1Socket = nullptr;
+    QTcpSocket *p2Socket = nullptr;
+    QTcpSocket *p3Socket = nullptr;
+    QTcpSocket *p4Socket = nullptr;
 
 };
 
