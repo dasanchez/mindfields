@@ -8,7 +8,7 @@ QT       += core gui network websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = MindfieldsClient
+TARGET = MindfieldsClientSim
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -25,10 +25,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mindfieldsclient.cpp
+    mindfieldsclientsim.cpp
 
 HEADERS += \
-        mindfieldsclient.h
+    mindfieldsclientsim.h
 
 FORMS += \
-        mindfieldsclient.ui
+    mindfieldsclientsim.ui

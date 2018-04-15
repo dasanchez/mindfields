@@ -10,3 +10,7 @@ MindfieldsClient/debug/moc_mindfieldsclient.cpp
 MindfieldsClient/debug/moc_predefs.h
 *.user
 MindfieldsClient/Makefile
+MindfieldsClientSim/debug/moc_mindfieldsclientsim.cpp
+MindfieldsClientSim/debug/moc_predefs.h
+MindfieldsClientSim/Makefile
+MindfieldsClientSim/ui_mindfieldsclientsim.h

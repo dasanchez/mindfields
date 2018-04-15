@@ -1,9 +1,9 @@
-#include "mindfieldsclient.h"
-#include "ui_mindfieldsclient.h"
+#include "mindfieldsclientsim.h"
+#include "ui_mindfieldsclientsim.h"
 
-MindfieldsClient::MindfieldsClient(QWidget *parent) :
+MindfieldsClientSim::MindfieldsClientSim(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MindfieldsClient)
+    ui(new Ui::MindfieldsClientSim)
 {
     ui->setupUi( this );
     //    p1Socket = new QTcpSocket( this );
@@ -66,12 +66,12 @@ MindfieldsClient::MindfieldsClient(QWidget *parent) :
     connect( p4Socket, SIGNAL( disconnected() ), this, SLOT( socketDisconnected() ) );
 }
 
-MindfieldsClient::~MindfieldsClient()
+MindfieldsClientSim::~MindfieldsClientSim()
 {
     delete ui;
 }
 
-void MindfieldsClient::disconnectSocket()
+void MindfieldsClientSim::disconnectSocket()
 {
     QPushButton *senderButton = qobject_cast<QPushButton *>( QObject::sender() );
 
@@ -85,7 +85,7 @@ void MindfieldsClient::disconnectSocket()
         p4Socket->close();
 }
 
-void MindfieldsClient::connectSocket()
+void MindfieldsClientSim::connectSocket()
 {
     QPushButton *senderButton = qobject_cast<QPushButton *>( QObject::sender() );
     // build Url
@@ -121,7 +121,7 @@ void MindfieldsClient::connectSocket()
     }
 }
 
-void MindfieldsClient::socketConnected()
+void MindfieldsClientSim::socketConnected()
 {
     QWebSocket *senderSocket = qobject_cast<QWebSocket *>( QObject::sender() );
 
@@ -135,7 +135,7 @@ void MindfieldsClient::socketConnected()
         ui->p4MessageBox->appendPlainText( QString( "Socket connected") );
 }
 
-void MindfieldsClient::socketDisconnected()
+void MindfieldsClientSim::socketDisconnected()
 {
     QWebSocket *senderSocket = qobject_cast<QWebSocket *>( QObject::sender() );
 
@@ -149,7 +149,7 @@ void MindfieldsClient::socketDisconnected()
         ui->p4MessageBox->appendPlainText( QString( "Socket disconnected") );
 }
 
-void MindfieldsClient::dataReceived( QString dataIn )
+void MindfieldsClientSim::dataReceived( QString dataIn )
 {
     QWebSocket *senderSocket = qobject_cast<QWebSocket *>( QObject::sender() );
 
@@ -163,7 +163,7 @@ void MindfieldsClient::dataReceived( QString dataIn )
         ui->p4MessageBox->appendPlainText( dataIn );
 }
 
-void MindfieldsClient::sendData()
+void MindfieldsClientSim::sendData()
 {
     QPushButton *senderButton = qobject_cast<QPushButton *>( QObject::sender() );
     QJsonObject json;
@@ -214,7 +214,7 @@ void MindfieldsClient::sendData()
     }
 }
 
-void MindfieldsClient::sendPlayerRequest()
+void MindfieldsClientSim::sendPlayerRequest()
 {
     QPushButton *senderButton = qobject_cast<QPushButton *>( QObject::sender() );
     QJsonObject json;
@@ -258,7 +258,7 @@ void MindfieldsClient::sendPlayerRequest()
     }
 }
 
-void MindfieldsClient::sendTeamRequest( )
+void MindfieldsClientSim::sendTeamRequest( )
 {
     QJsonObject json;
     json.insert( "type", "teamrequest" );
@@ -339,7 +339,7 @@ void MindfieldsClient::sendTeamRequest( )
     }
 }
 
-void MindfieldsClient::sendRoleRequest( )
+void MindfieldsClientSim::sendRoleRequest( )
 {
     QJsonObject json;
     json.insert( "type", "rolerequest" );

@@ -1,5 +1,5 @@
-#ifndef MINDFIELDSCLIENT_H
-#define MINDFIELDSCLIENT_H
+#ifndef MINDFIELDSCLIENTSIM_H
+#define MINDFIELDSCLIENTSIM_H
 
 #include <QWidget>
 #include <QTcpSocket>
@@ -13,16 +13,16 @@
 #include <QJsonObject>
 
 namespace Ui {
-class MindfieldsClient;
+class MindfieldsClientSim;
 }
 
-class MindfieldsClient : public QWidget
+class MindfieldsClientSim : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MindfieldsClient(QWidget *parent = 0);
-    ~MindfieldsClient();
+    explicit MindfieldsClientSim(QWidget *parent = 0);
+    ~MindfieldsClientSim();
 
 public slots:
     void connectSocket();
@@ -36,7 +36,7 @@ public slots:
     void sendRoleRequest( );
 
 private:
-    Ui::MindfieldsClient *ui;
+    Ui::MindfieldsClientSim *ui;
 //    QTcpSocket *p1Socket = nullptr;
 //    QTcpSocket *p2Socket = nullptr;
 //    QTcpSocket *p3Socket = nullptr;
@@ -49,4 +49,4 @@ private:
 
 };
 
-#endif // MINDFIELDSCLIENT_H
+#endif // MINDFIELDSCLIENTSIM_H
