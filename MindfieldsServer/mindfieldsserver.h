@@ -45,8 +45,6 @@ public:
         QTcpSocket *socket;
     };
 
-    void newSession( unsigned int ); // open server port to incoming connections
-
 private slots:
     void processConnection();
     void processClientData();
@@ -82,6 +80,7 @@ private:
 
     GameState gameState = LOBBY; // controls server responses
 
+    void newSession( unsigned int ); // open server port to incoming connections
     void readDictionary(); // read dict.txt file
     void generateWordList( quint8 ); // pull words from dictionary
     bool isNameTaken( QString ); // check if name is already in use
