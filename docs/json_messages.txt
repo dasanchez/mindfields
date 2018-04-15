@@ -23,41 +23,44 @@ type: "startgame"
 name: [ string ]
 
 Hint Submission
-type: hint
+type: "hint"
 hint: [ string ]
 count: [ int ]
 
 Hint Response
-type: hintresponse
+type: "hintresponse"
 response: "accepted" or "rejected"
 
 Guess submitted
-type: guess
+type: "guess"
 guess: [ string ]
 
 Message
-type: message
+type: "message"
 msg: [ string ]
+
+Ready to play again
+type: "restart"
 
 Server -> Client
 
 Name Accepted
-type: nameresponse
+type: "nameresponse"
 name: [ name ]
 response: "accepted" or "taken"
 
 Team Response
-type: teamresponse
+type: "teamresponse"
 response: "accepted" or "teamfull"
 team: "blue" or "orange"
 leader: [ bool ] (true or false)
 
 Role Request Response
-type: roleresponse
+type: "roleresponse"
 role: "leader" or "member"
 
 Team Leaders Assigned
-type: leadersready
+type: "leadersready"
 
 Word List
 type: "wordlist"
@@ -78,7 +81,7 @@ hint: [ string ] (optional)
 count: [ int ] ( optional )
 
 Notify players of timer start
-type: timerstart
+type: "timerstart"
 time: [ int ] (in seconds)
 
 Hint response
@@ -86,10 +89,15 @@ type: "hintresponse"
 response: "accepted" or "rejected"
 
 Guess evaluation
-type: guessreveal
+type: "guessreveal"
 guess: [ string ]
 player: [ string ]
 team: "blue" , "orange", or "neutral"
+
+All guesses so far
+type: "guesses"
+bluewords: [ string array ]
+orangewords: [ string array ]
 
 Winner reveal
 type: "winner"
