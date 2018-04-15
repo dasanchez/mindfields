@@ -6,10 +6,14 @@ MindfieldsClient::MindfieldsClient(QWidget *parent) :
     ui(new Ui::MindfieldsClient)
 {
     ui->setupUi( this );
-    p1Socket = new QTcpSocket( this );
-    p2Socket = new QTcpSocket( this );
-    p3Socket = new QTcpSocket( this );
-    p4Socket = new QTcpSocket( this );
+    //    p1Socket = new QTcpSocket( this );
+    //    p2Socket = new QTcpSocket( this );
+    //    p3Socket = new QTcpSocket( this );
+    //    p4Socket = new QTcpSocket( this );
+    p1Socket = new QWebSocket;
+    p2Socket = new QWebSocket;
+    p3Socket = new QWebSocket;
+    p4Socket = new QWebSocket;
 
     connect( ui->p1ConnectButton, SIGNAL( clicked( bool ) ), this, SLOT( connectSocket() ) );
     connect( ui->p2ConnectButton, SIGNAL( clicked( bool ) ), this, SLOT( connectSocket() ) );
@@ -44,10 +48,14 @@ MindfieldsClient::MindfieldsClient(QWidget *parent) :
     connect( ui->p3MemberButton, SIGNAL(clicked(bool)), this, SLOT( sendRoleRequest( ) ) );
     connect( ui->p4MemberButton, SIGNAL(clicked(bool)), this, SLOT( sendRoleRequest( ) ) );
 
-    connect( p1Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
-    connect( p2Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
-    connect( p3Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
-    connect( p4Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
+    //    connect( p1Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
+    //    connect( p2Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
+    //    connect( p3Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
+    //    connect( p4Socket, SIGNAL( readyRead() ), this, SLOT( dataReceived() ) );
+    connect( p1Socket, SIGNAL( textMessageReceived( QString ) ) , this, SLOT( dataReceived( QString ) ) );
+    connect( p2Socket, SIGNAL( textMessageReceived( QString ) ) , this, SLOT( dataReceived( QString ) ) );
+    connect( p3Socket, SIGNAL( textMessageReceived( QString ) ) , this, SLOT( dataReceived( QString ) ) );
+    connect( p4Socket, SIGNAL( textMessageReceived( QString ) ) , this, SLOT( dataReceived( QString ) ) );
     connect( p1Socket, SIGNAL( connected() ), this, SLOT( socketConnected() ) );
     connect( p2Socket, SIGNAL( connected() ), this, SLOT( socketConnected() ) );
     connect( p3Socket, SIGNAL( connected() ), this, SLOT( socketConnected() ) );
@@ -68,31 +76,54 @@ void MindfieldsClient::disconnectSocket()
     QPushButton *senderButton = qobject_cast<QPushButton *>( QObject::sender() );
 
     if ( senderButton == ui->p1DisconnectButton )
-        p1Socket->disconnectFromHost();
+        p1Socket->close();
     else if ( senderButton == ui->p2DisconnectButton )
-        p2Socket->disconnectFromHost();
+        p2Socket->close();
     else if ( senderButton == ui->p3DisconnectButton )
-        p3Socket->disconnectFromHost();
+        p3Socket->close();
     else if ( senderButton == ui->p4DisconnectButton )
-        p4Socket->disconnectFromHost();
+        p4Socket->close();
 }
 
 void MindfieldsClient::connectSocket()
 {
     QPushButton *senderButton = qobject_cast<QPushButton *>( QObject::sender() );
+    // build Url
+    QString urlStr;
+    urlStr.append("ws://localhost:");
+
     if ( senderButton == ui->p1ConnectButton )
-        p1Socket->connectToHost( QHostAddress::LocalHost, ui->p1PortBox->value() );
+    {
+        urlStr.append(QString("%1").arg(ui->p1PortBox->value()));
+        QUrl url(urlStr);
+        p1Socket->open(url);
+    }
     else if ( senderButton == ui->p2ConnectButton )
-        p2Socket->connectToHost( QHostAddress::LocalHost, ui->p2PortBox->value() );
+    {
+        // build Url
+        urlStr.append(QString("%1").arg(ui->p2PortBox->value()));
+        QUrl url(urlStr);
+        p2Socket->open(url);
+    }
     else if ( senderButton == ui->p3ConnectButton )
-        p3Socket->connectToHost( QHostAddress::LocalHost, ui->p3PortBox->value() );
+    {
+        // build Url
+        urlStr.append(QString("%1").arg(ui->p3PortBox->value()));
+        QUrl url(urlStr);
+        p3Socket->open(url);
+    }
     else if ( senderButton == ui->p4ConnectButton )
-        p4Socket->connectToHost( QHostAddress::LocalHost, ui->p4PortBox->value() );
+    {
+        // build Url
+        urlStr.append(QString("%1").arg(ui->p4PortBox->value()));
+        QUrl url(urlStr);
+        p4Socket->open(url);
+    }
 }
 
 void MindfieldsClient::socketConnected()
 {
-    QTcpSocket *senderSocket = qobject_cast<QTcpSocket *>( QObject::sender() );
+    QWebSocket *senderSocket = qobject_cast<QWebSocket *>( QObject::sender() );
 
     if ( senderSocket == p1Socket )
         ui->p1MessageBox->appendPlainText(QString("Socket connected"));
@@ -106,7 +137,7 @@ void MindfieldsClient::socketConnected()
 
 void MindfieldsClient::socketDisconnected()
 {
-    QTcpSocket *senderSocket = qobject_cast<QTcpSocket *>( QObject::sender() );
+    QWebSocket *senderSocket = qobject_cast<QWebSocket *>( QObject::sender() );
 
     if ( senderSocket == p1Socket )
         ui->p1MessageBox->appendPlainText(QString("Socket disconnected"));
@@ -118,48 +149,18 @@ void MindfieldsClient::socketDisconnected()
         ui->p4MessageBox->appendPlainText( QString( "Socket disconnected") );
 }
 
-void MindfieldsClient::dataReceived()
+void MindfieldsClient::dataReceived( QString dataIn )
 {
-    QTcpSocket *senderSocket = qobject_cast<QTcpSocket *>( QObject::sender() );
+    QWebSocket *senderSocket = qobject_cast<QWebSocket *>( QObject::sender() );
 
     if ( senderSocket == p1Socket )
-    {
-        while ( p1Socket->bytesAvailable() > 0 )
-        {
-            QByteArray data = p1Socket->readAll();
-            qDebug() << "p1> " << data;
-            ui->p1MessageBox->appendPlainText( QString( data ) );
-        }
-    }
+        ui->p1MessageBox->appendPlainText( dataIn );
     else if ( senderSocket == p2Socket )
-    {
-        while ( p2Socket->bytesAvailable() > 0 )
-        {
-            QByteArray data = p2Socket->readAll();
-            qDebug() << "p2> " << data;
-            ui->p2MessageBox->appendPlainText( QString( data ) );
-        }
-    }
+        ui->p2MessageBox->appendPlainText( dataIn );
     else if ( senderSocket == p3Socket )
-    {
-        while ( p3Socket->bytesAvailable() > 0 )
-        {
-            QByteArray data = p3Socket->readAll();
-            qDebug() << "p3> " << data;
-            ui->p3MessageBox->appendPlainText( QString( data ) );
-        }
-    }
+        ui->p3MessageBox->appendPlainText( dataIn );
     else if ( senderSocket == p4Socket )
-    {
-        while ( p4Socket->bytesAvailable() > 0 )
-        {
-            QByteArray data = p4Socket->readAll();
-            qDebug() << "p4> " << data;
-            ui->p4MessageBox->appendPlainText( QString( data ) );
-        }
-    }
-
-
+        ui->p4MessageBox->appendPlainText( dataIn );
 }
 
 void MindfieldsClient::sendData()
@@ -173,9 +174,9 @@ void MindfieldsClient::sendData()
         json.insert( ui->p1Key1Edit->text(), ui->p1Value1Edit->text() );
         json.insert( ui->p1Key2Edit->text(), ui->p1Value2Edit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p1Socket->isOpen() )
+        if ( p1Socket->isValid() )
         {
-            p1Socket->write( jsonDoc.toJson() );
+            p1Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p2SendButton )
@@ -184,9 +185,9 @@ void MindfieldsClient::sendData()
         json.insert( ui->p2Key1Edit->text(), ui->p2Value1Edit->text() );
         json.insert( ui->p2Key2Edit->text(), ui->p2Value2Edit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p2Socket->isOpen() )
+        if ( p2Socket->isValid() )
         {
-            p2Socket->write( jsonDoc.toJson() );
+            p2Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p3SendButton )
@@ -195,9 +196,9 @@ void MindfieldsClient::sendData()
         json.insert( ui->p3Key1Edit->text(), ui->p3Value1Edit->text() );
         json.insert( ui->p3Key2Edit->text(), ui->p3Value2Edit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p3Socket->isOpen() )
+        if ( p3Socket->isValid() )
         {
-            p3Socket->write( jsonDoc.toJson() );
+            p3Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p4SendButton )
@@ -206,9 +207,9 @@ void MindfieldsClient::sendData()
         json.insert( ui->p4Key1Edit->text(), ui->p4Value1Edit->text() );
         json.insert( ui->p4Key2Edit->text(), ui->p4Value2Edit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p4Socket->isOpen() )
+        if ( p4Socket->isValid() )
         {
-            p4Socket->write( jsonDoc.toJson() );
+            p4Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
 }
@@ -223,36 +224,36 @@ void MindfieldsClient::sendPlayerRequest()
     {
         json.insert( "name", ui->p1NameEdit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p1Socket->isOpen() )
+        if ( p1Socket->isValid() )
         {
-            p1Socket->write( jsonDoc.toJson() );
+            p1Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p2PlayerButton )
     {
         json.insert( "name", ui->p2NameEdit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p2Socket->isOpen() )
+        if ( p2Socket->isValid() )
         {
-            p2Socket->write( jsonDoc.toJson() );
+            p2Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p3PlayerButton )
     {
         json.insert( "name", ui->p3NameEdit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p3Socket->isOpen() )
+        if ( p3Socket->isValid() )
         {
-            p3Socket->write( jsonDoc.toJson() );
+            p3Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p4PlayerButton )
     {
         json.insert( "name", ui->p4NameEdit->text() );
         QJsonDocument jsonDoc(json);
-        if ( p4Socket->isOpen() )
+        if ( p4Socket->isValid() )
         {
-            p4Socket->write( jsonDoc.toJson() );
+            p4Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
 }
@@ -268,72 +269,72 @@ void MindfieldsClient::sendTeamRequest( )
     {
         json.insert( "team", "blue" );
         QJsonDocument jsonDoc(json);
-        if ( p1Socket->isOpen() )
+        if ( p1Socket->isValid() )
         {
-            p1Socket->write( jsonDoc.toJson() );
+            p1Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p1OrangeButton )
     {
         json.insert( "team", "orange" );
         QJsonDocument jsonDoc(json);
-        if ( p1Socket->isOpen() )
+        if ( p1Socket->isValid() )
         {
-            p1Socket->write( jsonDoc.toJson() );
+            p1Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p2BlueButton )
     {
         json.insert( "team", "blue" );
         QJsonDocument jsonDoc(json);
-        if ( p2Socket->isOpen() )
+        if ( p2Socket->isValid() )
         {
-            p2Socket->write( jsonDoc.toJson() );
+            p2Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p2OrangeButton )
     {
         json.insert( "team", "orange" );
         QJsonDocument jsonDoc(json);
-        if ( p2Socket->isOpen() )
+        if ( p2Socket->isValid() )
         {
-            p2Socket->write( jsonDoc.toJson() );
+            p2Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p3BlueButton )
     {
         json.insert( "team", "blue" );
         QJsonDocument jsonDoc(json);
-        if ( p3Socket->isOpen() )
+        if ( p3Socket->isValid() )
         {
-            p3Socket->write( jsonDoc.toJson() );
+            p3Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p3OrangeButton )
     {
         json.insert( "team", "orange" );
         QJsonDocument jsonDoc(json);
-        if ( p3Socket->isOpen() )
+        if ( p3Socket->isValid() )
         {
-            p3Socket->write( jsonDoc.toJson() );
+            p3Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p4BlueButton )
     {
         json.insert( "team", "blue" );
         QJsonDocument jsonDoc(json);
-        if ( p4Socket->isOpen() )
+        if ( p4Socket->isValid() )
         {
-            p4Socket->write( jsonDoc.toJson() );
+            p4Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p4OrangeButton )
     {
         json.insert( "team", "orange" );
         QJsonDocument jsonDoc(json);
-        if ( p4Socket->isOpen() )
+        if ( p4Socket->isValid() )
         {
-            p4Socket->write( jsonDoc.toJson() );
+            p4Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
 }
@@ -349,72 +350,72 @@ void MindfieldsClient::sendRoleRequest( )
     {
         json.insert( "role", "leader" );
         QJsonDocument jsonDoc(json);
-        if ( p1Socket->isOpen() )
+        if ( p1Socket->isValid() )
         {
-            p1Socket->write( jsonDoc.toJson() );
+            p1Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p1MemberButton )
     {
         json.insert( "role", "member" );
         QJsonDocument jsonDoc(json);
-        if ( p1Socket->isOpen() )
+        if ( p1Socket->isValid() )
         {
-            p1Socket->write( jsonDoc.toJson() );
+            p1Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p2LeaderButton )
     {
         json.insert( "role", "leader" );
         QJsonDocument jsonDoc(json);
-        if ( p2Socket->isOpen() )
+        if ( p2Socket->isValid() )
         {
-            p2Socket->write( jsonDoc.toJson() );
+            p2Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p2MemberButton )
     {
         json.insert( "role", "member" );
         QJsonDocument jsonDoc(json);
-        if ( p2Socket->isOpen() )
+        if ( p2Socket->isValid() )
         {
-            p2Socket->write( jsonDoc.toJson() );
+            p2Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p3LeaderButton )
     {
         json.insert( "role", "leader" );
         QJsonDocument jsonDoc(json);
-        if ( p3Socket->isOpen() )
+        if ( p3Socket->isValid() )
         {
-            p3Socket->write( jsonDoc.toJson() );
+            p3Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p3MemberButton )
     {
         json.insert( "role", "member" );
         QJsonDocument jsonDoc(json);
-        if ( p3Socket->isOpen() )
+        if ( p3Socket->isValid() )
         {
-            p3Socket->write( jsonDoc.toJson() );
+            p3Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p4LeaderButton )
     {
         json.insert( "role", "leader" );
         QJsonDocument jsonDoc(json);
-        if ( p4Socket->isOpen() )
+        if ( p4Socket->isValid() )
         {
-            p4Socket->write( jsonDoc.toJson() );
+            p4Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
     else if ( senderButton == ui->p4MemberButton )
     {
         json.insert( "role", "member" );
         QJsonDocument jsonDoc(json);
-        if ( p4Socket->isOpen() )
+        if ( p4Socket->isValid() )
         {
-            p4Socket->write( jsonDoc.toJson() );
+            p4Socket->sendTextMessage( QString( jsonDoc.toJson() ) );
         }
     }
 }
