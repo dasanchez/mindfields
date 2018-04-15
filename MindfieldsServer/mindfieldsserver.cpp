@@ -1,6 +1,6 @@
 #include "mindfieldsserver.h"
 
-MindfieldsServer::MindfieldsServer(QObject *parent) : QObject(parent)
+MindfieldsServer::MindfieldsServer( QObject *parent, unsigned int port ) : QObject(parent)
 {
     debugMode = true;
 
@@ -13,7 +13,7 @@ MindfieldsServer::MindfieldsServer(QObject *parent) : QObject(parent)
     connect( gameTimer, SIGNAL( timeout()) , this, SLOT( serviceTimer() ) );
 
     // start TCP server
-    newSession();
+    newSession( port );
     connect( tcpServer, SIGNAL( newConnection() ), this, SLOT( processConnection() ) );
 }
 
@@ -254,7 +254,7 @@ void MindfieldsServer::makeNewPlayer(QString name, QTcpSocket *socket)
 }
 
 // start TCP server
-void MindfieldsServer::newSession()
+void MindfieldsServer::newSession( unsigned int listenPort )
 {
     tcpServer = new QTcpServer(this);
     if ( !tcpServer->listen(QHostAddress::LocalHost, listenPort )) {
@@ -364,14 +364,8 @@ void MindfieldsServer::processClientData()
         if ( json.value( "type" ) == QString( "hint") )
         {
             // hint has been submitted
-            guessCount = json.value( "count" ).toString().toInt();
+            guessCount = json.value( "count" ).toInt();
             hintReceived( json.value( "hint" ).toString(), sourceClient );
-
-            if ( debugMode )
-            {
-                qDebug() << "Hint: " << json.value("hint").toString()
-                         << ", count: " << json.value("count").toString().toInt();
-            }
         }
         else if ( json.value( "type") == QString( "hintresponse" ) )
         {
@@ -865,7 +859,15 @@ void MindfieldsServer::serviceTimer()
         newTime = turnTime;
         break;
     case GUESS_REVEALED: // guess has been published to all players
-        if ( blueCardsLeft < 1 || orangeCardsLeft < 1 ) // somebody just won
+        // we are out of guesses OR there was an incorrect answer
+        if ( guessCount < 1 || !correctGuess )
+        {
+            switchTeams(); // flip currentTurn between BLUE and ORANGE
+            gameState = AWAITING_HINT;
+            jsonMessage.insert("newstate", "awaitinghint");
+            newTime = turnTime;
+        }
+        else if ( blueCardsLeft < 1 || orangeCardsLeft < 1 ) // somebody just won
         {
             gameState = GAME_OVER;
             jsonMessage.insert("newstate", "gameover");
@@ -878,13 +880,6 @@ void MindfieldsServer::serviceTimer()
             {
                 jsonMessage.insert( "winner", "orange" );
             }
-        }
-        else if ( guessCount < 1 || !correctGuess ) // we are out of guesses OR there was an incorrect answer
-        {
-            switchTeams(); // flip currentTurn between BLUE and ORANGE
-            gameState = AWAITING_HINT;
-            jsonMessage.insert("newstate", "awaitinghint");
-            newTime = turnTime;
         }
         else // we still have guesses left and nobody has won yet
         {

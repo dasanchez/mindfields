@@ -23,14 +23,12 @@ class MindfieldsServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit MindfieldsServer(QObject *parent = nullptr);
+    explicit MindfieldsServer( QObject *parent = nullptr, unsigned int port = 8888 );
 
     enum Role { LEADER, MEMBER};
     enum Team { BLUE, ORANGE, NEUTRAL };
     enum GameState { LOBBY, WORDS_PRESENTED, HINT_APPROVAL, GAME_OVER,
                      AWAITING_HINT, AWAITING_GUESS, GUESS_REVEALED };
-
-    int listenPort = 8888;
 
     static const int totalCards = 16;
     static const int cardsFirstTeam = 7;
@@ -46,6 +44,8 @@ public:
         bool        ready;
         QTcpSocket *socket;
     };
+
+    void newSession( unsigned int ); // open server port to incoming connections
 
 private slots:
     void processConnection();
@@ -82,7 +82,6 @@ private:
 
     GameState gameState = LOBBY; // controls server responses
 
-    void newSession(); // open server port to incoming connections
     void readDictionary(); // read dict.txt file
     void generateWordList( quint8 ); // pull words from dictionary
     bool isNameTaken( QString ); // check if name is already in use
