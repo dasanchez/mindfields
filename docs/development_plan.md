@@ -14,7 +14,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*See _client\_server\_evaluation.md_ 
 
 ### Stage 2: Implementation planning
-[ ] Generate server testbed  
+[X] [Generate server testbed](../MindfieldsServer)  
 [ ] Explore UI options through interactive mockups  
 &nbsp;&nbsp;&nbsp;&nbsp;- Processing  
 &nbsp;&nbsp;&nbsp;&nbsp;- QML  

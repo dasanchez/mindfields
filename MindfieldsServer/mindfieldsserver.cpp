@@ -85,9 +85,21 @@ void MindfieldsServer::clientDisconnected()
         sourceClient->deleteLater(); // MIGHT BREAK: test
     }
 
-    // reassign leadership
+    // deal with a departing leader
     if ( wasLeader )
     {
+        if ( playerTeam == BLUE )
+        {
+            blueLeader = false;
+            blueLeaderReady = false;
+        }
+        else if ( playerTeam == ORANGE )
+        {
+            orangeLeader = false;
+            orangeLeaderReady = false;
+        }
+
+        // re-assign role if there are other players available
         for ( int i = 0; i< gamePlayers.size() ; ++i )
         {
             if ( gamePlayers[ i ].team == playerTeam )
@@ -680,6 +692,8 @@ void MindfieldsServer::processConnection()
         connect( clientConnection, SIGNAL( disconnected()), this, SLOT( clientDisconnected() ) );
         connect( clientConnection, SIGNAL( textMessageReceived(QString)),
                  this, SLOT( processWSData(QString) ) );
+        if ( debugMode )
+            qDebug() << "New WebSocket connected";
 
     }
 }
@@ -1227,6 +1241,9 @@ void MindfieldsServer::processWSData(QString dataIn)
 {
     QByteArray clientData;
     clientData.append( dataIn );
+
+    if ( debugMode )
+        qDebug() << clientData;
 
     // extract JSON from raw data
     QJsonDocument jsonDoc = QJsonDocument::fromJson(clientData);
