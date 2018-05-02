@@ -14,3 +14,9 @@ MindfieldsClientSim/debug/moc_mindfieldsclientsim.cpp
 MindfieldsClientSim/debug/moc_predefs.h
 MindfieldsClientSim/Makefile
 MindfieldsClientSim/ui_mindfieldsclientsim.h
+MindfieldsClientSimCpp/debug/moc_mindfieldsclientsim.cpp
+MindfieldsClientSimCpp/debug/moc_predefs.h
+MindfieldsClientSimCpp/Makefile
+MindfieldsClientMockupQML/Makefile
+MindfieldsServerCpp/debug/moc_predefs.h
+MindfieldsServerCpp/debug/dict.txt
