@@ -20,3 +20,4 @@ MindfieldsClientSimCpp/Makefile
 MindfieldsClientMockupQML/Makefile
 MindfieldsServerCpp/debug/moc_predefs.h
 MindfieldsServerCpp/debug/dict.txt
+MindfieldsClientMockupQML/debug/qrc_qml.cpp
