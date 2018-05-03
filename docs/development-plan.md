@@ -21,7 +21,7 @@
 [ ] Generate deployment diagram  
 
 ### Stage 3: Protoype
-[ ] Develop game server ("game room")
+[ ] Develop game server ("game room")  
 [ ] Publish server API  
 [ ] Develop game client  
 
