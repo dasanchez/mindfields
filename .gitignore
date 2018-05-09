@@ -21,3 +21,7 @@ MindfieldsClientMockupQML/Makefile
 MindfieldsServerCpp/debug/moc_predefs.h
 MindfieldsServerCpp/debug/dict.txt
 MindfieldsClientMockupQML/debug/qrc_qml.cpp
+docs/UML/server/server-waiting-guess-activities.png
+docs/UML/server/server-game-start-activities.png
+docs/UML/server/server-waiting-hint-activities.png
+docs/UML/server/server-lobby-activities.png
