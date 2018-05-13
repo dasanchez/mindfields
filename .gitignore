@@ -26,3 +26,5 @@ docs/UML/server/server-game-start-activities.png
 docs/UML/server/server-waiting-hint-activities.png
 docs/UML/server/server-lobby-activities.png
 docs/UML/server/server-states.png
+docs/UML/server/server-game-over-activities.png
+docs/UML/server/server-word-chosen-activities.png
